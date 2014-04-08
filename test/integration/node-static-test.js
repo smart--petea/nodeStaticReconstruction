@@ -24,6 +24,7 @@ headers = {
   }
 }
 headers['requesting headers']['should respond with node-static/' + version] = function(error, response, body){
+	console.log(20);
   assert.equal(response.headers['server'], 'node-static/' + version);
 }
 
@@ -42,6 +43,7 @@ suite.addBatch({
     'should be listening' : function(){
       /* This test is necessary to ensure the topic execution.
        * A topic without tests will be not executed */
+	  console.log(1);
       assert.isTrue(true);
     }
   },
@@ -59,9 +61,11 @@ suite.addBatch({
         request.get(TEST_SERVER + '/not-found', this.callback);
       },
       'should respond with 404' : function(error, response, body){
+	  	console.log(2);
         assert.equal(response.statusCode, 404);
       },
       'should respond with the streamed content': function(error, response, body){
+	  	console.log(3);
         callback = null;
         assert.equal(body, 'Custom 404 Stream.');
       }
@@ -77,6 +81,7 @@ suite.addBatch({
     'should be listening' : function(){
       /* This test is necessary to ensure the topic execution.
        * A topic without tests will be not executed */
+	   console.log(4);
       assert.isTrue(true);
     }
   }
@@ -86,6 +91,7 @@ suite.addBatch({
         request.get(TEST_SERVER + '/not-found', this.callback);
       },
       'should respond with 404' : function(error, response, body){
+	  	console.log(5);
         assert.equal(response.statusCode, 404);
       }
     }
@@ -96,6 +102,7 @@ suite.addBatch({
         request.get(TEST_SERVER + '/a%AFc', this.callback);
       },
       'should respond with 400': function(error, response, body){
+		  console.log(6);
         assert.equal(response.statusCode, 400);
       }
     }
@@ -106,12 +113,15 @@ suite.addBatch({
       request.get(TEST_SERVER + '/hello.txt', this.callback);
     },
     'should respond with 200' : function(error, response, body){
+		console.log(7);
       assert.equal(response.statusCode, 200);
     },
     'should respond with text/plain': function(error, response, body){
+		console.log(8);
       assert.equal(response.headers['content-type'], 'text/plain');
     },
     'should respond with hello world': function(error, response, body){
+		console.log(9);
       assert.equal(body, 'hello world');
     }
   }
@@ -121,9 +131,11 @@ suite.addBatch({
       request.get(TEST_SERVER, this.callback);
     },
     'should respond with 200' : function(error, response, body){
+		console.log(10)
       assert.equal(response.statusCode, 200);
     },
     'should respond with text/html': function(error, response, body){
+		console.log(11);
       assert.equal(response.headers['content-type'], 'text/html');
     }
   }
@@ -133,9 +145,11 @@ suite.addBatch({
       request.get(TEST_SERVER + '/index.html', this.callback);
     },
     'should respond with 200' : function(error, response, body){
+		console.log(12);
       assert.equal(response.statusCode, 200);
     },
     'should respond with text/html': function(error, response, body){
+		console.log(13);
       assert.equal(response.headers['content-type'], 'text/html');
     }
   }
@@ -153,6 +167,7 @@ suite.addBatch({
       });
     },
     'should respond with 304' : function(error, response, body){
+		console.log(14);
       assert.equal(response.statusCode, 304);
     }
   },
@@ -175,6 +190,7 @@ suite.addBatch({
       });
     },
     'should respond with a 200': function(error, response, body){
+		console.log(15);
       assert.equal(response.statusCode, 200);
     }
   }
@@ -185,9 +201,11 @@ suite.addBatch({
       request.post(TEST_SERVER + '/index.html', this.callback);
     },
     'should respond with 200' : function(error, response, body){
+		console.log(16);
       assert.equal(response.statusCode, 200);
     },
     'should not be empty' : function(error, response, body){
+		console.log(17);
       assert.isNotEmpty(body);
     }
   }
@@ -198,9 +216,11 @@ suite.addBatch({
       request.head(TEST_SERVER + '/index.html', this.callback);
     },
     'should respond with 200' : function(error, response, body){
+		console.log(18);
       assert.equal(response.statusCode, 200);
     },
     'head must has no body' : function(error, response, body){
+		console.log(19);
       assert.isEmpty(body);
     }
   }
@@ -213,6 +233,7 @@ suite.addBatch({
       this.callback();
     },
     'should add woff' : function(error, response, body){
+		console.log(21);
       assert.equal(static.mime.lookup('woff'), 'application/font-woff');
     }
   }
