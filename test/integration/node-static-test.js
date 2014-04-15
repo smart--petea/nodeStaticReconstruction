@@ -167,14 +167,15 @@ suite.addBatch({
       });
     },
     'should respond with 304' : function(error, response, body){
-		console.log(14);
       assert.equal(response.statusCode, 304);
     }
   },
   'requesting with If-None-Match and If-Modified-Since': {
     topic : function(){
+      console.log('requesting with If-None-Match and If-Modified-Since');
       var _this = this;
       request.get(TEST_SERVER + '/index.html', function(error, response, body){
+
         var modified = Date.parse(response.headers['last-modified']);
         var oneDayLater = new Date(modified + (24 * 60 * 60 * 1000)).toUTCString();
         var nonMatchingEtag = '1111222233334444';
@@ -190,7 +191,7 @@ suite.addBatch({
       });
     },
     'should respond with a 200': function(error, response, body){
-		console.log(15);
+      console.log('should respond with a 200');
       assert.equal(response.statusCode, 200);
     }
   }
@@ -198,14 +199,15 @@ suite.addBatch({
 .addBatch({
   'requesting POST': {
     topic : function(){
+      console.log('requesting POST');
       request.post(TEST_SERVER + '/index.html', this.callback);
     },
     'should respond with 200' : function(error, response, body){
-		console.log(16);
+      console.log('requesting POST');
       assert.equal(response.statusCode, 200);
     },
     'should not be empty' : function(error, response, body){
-		console.log(17);
+      console.log('should not be empty');
       assert.isNotEmpty(body);
     }
   }
