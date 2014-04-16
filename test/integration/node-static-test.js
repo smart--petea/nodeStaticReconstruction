@@ -19,12 +19,13 @@ process.on("uncaughtException", function(err) {
 headers = {
   'requesting headers': {
     topic : function(){
+      console.log('requesting headers');
       request.head(TEST_SERVER + '/index.html', this.callback);
     }
   }
 }
 headers['requesting headers']['should respond with node-static/' + version] = function(error, response, body){
-	console.log(20);
+	console.log('should respond with node-static/');
   assert.equal(response.headers['server'], 'node-static/' + version);
 }
 
@@ -196,7 +197,7 @@ suite.addBatch({
     }
   }
 })
-.addBatch({
+/*.addBatch({
   'requesting POST': {
     topic : function(){
       console.log('requesting POST');
@@ -211,18 +212,19 @@ suite.addBatch({
       assert.isNotEmpty(body);
     }
   }
-})
+})*/
 .addBatch({
   'requesting HEAD': {
     topic : function(){
+      console.log('requesting HEAD');
       request.head(TEST_SERVER + '/index.html', this.callback);
     },
     'should respond with 200' : function(error, response, body){
-		console.log(18);
+		console.log('should respond with 200');
       assert.equal(response.statusCode, 200);
     },
     'head must has no body' : function(error, response, body){
-		console.log(19);
+		console.log('head must has no body');
       assert.isEmpty(body);
     }
   }
