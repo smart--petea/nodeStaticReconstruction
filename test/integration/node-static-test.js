@@ -32,6 +32,7 @@ headers['requesting headers']['should respond with node-static/' + version] = fu
 suite.addBatch({
   'once an http server is listening with a callback': {
     topic: function () {
+      console.log('once an http server is listening with a callback');
       server = require('http').createServer(function (request, response) {
         fileServer.serve(request, response, function(err, result) {
           if (callback)
@@ -44,13 +45,14 @@ suite.addBatch({
     'should be listening' : function(){
       /* This test is necessary to ensure the topic execution.
        * A topic without tests will be not executed */
-	  console.log(1);
+	  console.log('should be listening' );
       assert.isTrue(true);
     }
   },
 }).addBatch({
     'streaming a 404 page': {
       topic: function(){
+        console.log('streaming a 404 page');
         callback = function(request, response, err, result) {
           if (err) {
             response.writeHead(err.status, err.headers);
@@ -62,11 +64,11 @@ suite.addBatch({
         request.get(TEST_SERVER + '/not-found', this.callback);
       },
       'should respond with 404' : function(error, response, body){
-	  	console.log(2);
+	  	console.log('should respond with 404' );
         assert.equal(response.statusCode, 404);
       },
       'should respond with the streamed content': function(error, response, body){
-	  	console.log(3);
+	  	console.log('should respond with the streamed content');
         callback = null;
         assert.equal(body, 'Custom 404 Stream.');
       }
@@ -74,6 +76,7 @@ suite.addBatch({
 }).addBatch({
   'once an http server is listening without a callback': {
     topic: function () {
+      console.log('once an http server is listening without a callback');
       server.close();
       server = require('http').createServer(function (request, response) {
         fileServer.serve(request, response);
@@ -82,17 +85,18 @@ suite.addBatch({
     'should be listening' : function(){
       /* This test is necessary to ensure the topic execution.
        * A topic without tests will be not executed */
-	   console.log(4);
+      console.log('should be listening' );
       assert.isTrue(true);
     }
   }
 }).addBatch({
     'requesting a file not found': {
       topic : function(){
+        console.log('requesting a file not found');
         request.get(TEST_SERVER + '/not-found', this.callback);
       },
       'should respond with 404' : function(error, response, body){
-	  	console.log(5);
+	  	console.log('should respond with 404' );
         assert.equal(response.statusCode, 404);
       }
     }
@@ -100,10 +104,11 @@ suite.addBatch({
 .addBatch({
     'requesting a malformed URI': {
       topic: function(){
+        console.log('requesting a malformed URI');
         request.get(TEST_SERVER + '/a%AFc', this.callback);
       },
       'should respond with 400': function(error, response, body){
-		  console.log(6);
+        console.log('should respond with 400');
         assert.equal(response.statusCode, 400);
       }
     }
@@ -111,46 +116,49 @@ suite.addBatch({
 .addBatch({
   'serving hello.txt': {
     topic : function(){
+      console.log('serving hello.txt');
       request.get(TEST_SERVER + '/hello.txt', this.callback);
     },
     'should respond with 200' : function(error, response, body){
-		console.log(7);
+		console.log('should respond with 200' );
       assert.equal(response.statusCode, 200);
     },
     'should respond with text/plain': function(error, response, body){
-		console.log(8);
+		console.log('should respond with text/plain');
       assert.equal(response.headers['content-type'], 'text/plain');
     },
     'should respond with hello world': function(error, response, body){
-		console.log(9);
+      console.log( 'should respond with hello world');
       assert.equal(body, 'hello world');
     }
   }
 }).addBatch({
   'serving directory index': {
     topic : function(){
+      console.log('serving directory index');
       request.get(TEST_SERVER, this.callback);
     },
     'should respond with 200' : function(error, response, body){
-		console.log(10)
+      console.log('should respond with 200' )
       assert.equal(response.statusCode, 200);
     },
     'should respond with text/html': function(error, response, body){
-		console.log(11);
+      console.log('should respond with text/html');
       assert.equal(response.headers['content-type'], 'text/html');
     }
   }
 }).addBatch({
   'serving index.html from the cache': {
     topic : function(){
+      console.log('serving index.html from the cache');
       request.get(TEST_SERVER + '/index.html', this.callback);
     },
     'should respond with 200' : function(error, response, body){
-		console.log(12);
+      console.log('should respond with 200' );
       assert.equal(response.statusCode, 200);
     },
     'should respond with text/html': function(error, response, body){
-		console.log(13);
+      console.log('should respond with text/html');
       assert.equal(response.headers['content-type'], 'text/html');
     }
   }
@@ -233,11 +241,12 @@ suite.addBatch({
 .addBatch({
   'addings custom mime types': {
     topic : function(){
+      console.log('addings custom mime types');
       static.mime.define({'application/font-woff': ['woff']});
       this.callback();
     },
     'should add woff' : function(error, response, body){
-		console.log(21);
+      console.log('should add woff' );
       assert.equal(static.mime.lookup('woff'), 'application/font-woff');
     }
   }
@@ -245,12 +254,15 @@ suite.addBatch({
 .addBatch({
   'serving subdirectory index': {
     topic : function(){
+      console.log('serving subdirectory index');
       request.get(TEST_SERVER + '/there/', this.callback); // with trailing slash
     },
     'should respond with 200' : function(error, response, body){
+      console.log('should respond with 200' );
       assert.equal(response.statusCode, 200);
     },
     'should respond with text/html': function(error, response, body){
+      console.log('should respond with text/html');
       assert.equal(response.headers['content-type'], 'text/html');
     }
   }
@@ -258,15 +270,19 @@ suite.addBatch({
 .addBatch({
   'redirecting to subdirectory index': {
     topic : function(){
+      console.log('redirecting to subdirectory index');
       request.get({ url: TEST_SERVER + '/there', followRedirect: false }, this.callback); // without trailing slash
     },
     'should respond with 301' : function(error, response, body){
+      console.log('should respond with 301' );
       assert.equal(response.statusCode, 301);
     },
     'should respond with location header': function(error, response, body){
+      console.log( 'should respond with location header');
       assert.equal(response.headers['location'], '/there/'); // now with trailing slash
     },
     'should respond with empty string body' : function(error, response, body){
+      console.log('should respond with empty string body' );
       assert.equal(body, '');
     }
   }
@@ -274,9 +290,11 @@ suite.addBatch({
 .addBatch({
   'requesting a subdirectory (with trailing slash) not found': {
     topic : function(){
+      console.log('requesting a subdirectory (with trailing slash) not found');
       request.get(TEST_SERVER + '/notthere/', this.callback); // with trailing slash
     },
     'should respond with 404' : function(error, response, body){
+      console.log('should respond with 404' );
       assert.equal(response.statusCode, 404);
     }
   }
@@ -284,9 +302,11 @@ suite.addBatch({
 .addBatch({
   'requesting a subdirectory (without trailing slash) not found': {
     topic : function(){
+      console.log('requesting a subdirectory (without trailing slash) not found');
       request.get({ url: TEST_SERVER + '/notthere', followRedirect: false }, this.callback); // without trailing slash
     },
     'should respond with 404' : function(error, response, body){
+      console.log('should respond with 404' );
       assert.equal(response.statusCode, 404);
     }
   }
