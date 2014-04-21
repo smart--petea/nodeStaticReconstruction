@@ -337,13 +337,20 @@ suite.addBatch({
   }
 })
 .addBatch({
-  'verify cache control header with max-age param setted': {
+  'verify server setted options': {
       topic: function() {
         console.log('verify cache control header with max-age param setted');
         server.close();
         server = new http.Server; 
         //create new file server with cache = 7200, for 2 hours of freshness
-        fileServer = new _static.Server(__dirname + '/../fixtures', {cache: 7200});
+        fileServer = new _static.Server(__dirname + '/../fixtures', {
+                                                                      cache: 7200, 
+                                                                      serverInfo: 'petruchio',
+                                                                      headers: {
+                                                                        'x-petruchio': 'ticu',
+                                                                      },
+                                                                    }
+                                      );
 
         server.on('request', function(req, res) {
           fileServer.serve(req, res);
@@ -370,6 +377,14 @@ suite.addBatch({
 
         assert.equal(components['max-age'], '7200');
       },
+      'the value of server header must be "petruchio"': function(err, resp, body) {
+          console.log('the value of server header must be "petruchio"');
+          assert.equal(resp.headers['server'], 'petruchio');
+      },
+     'the value header with name x-petruchio must be "ticu"': function(err, resp, body) {
+          console.log('the value header with name "x-petruchio" must be "ticu"');
+          assert.equal(resp.headers['x-petruchio'], 'ticu');
+     },
   }
 })
 .export(module);
