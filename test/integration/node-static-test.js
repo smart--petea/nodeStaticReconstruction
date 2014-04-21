@@ -1,13 +1,15 @@
-var vows    = require('vows')
-  , request = require('request')
+var vows    = require('vows'),
+  _ = require('underscore'),
+  request = require('request')
   , assert  = require('assert')
-  , static  = require('../../lib/node-static');
+  , _static  = require('../../lib/node-static'),
+  http = require('http');
 
-var fileServer  = new static.Server(__dirname + '/../fixtures');
+var fileServer  = new _static.Server(__dirname + '/../fixtures');
 var suite       = vows.describe('node-static');
 var TEST_PORT   = 8080;
 var TEST_SERVER = 'http://localhost:' + TEST_PORT;
-var version     = static.version.join('.');
+var version     = _static.version.join('.');
 var server;
 var callback;
 
@@ -33,7 +35,7 @@ suite.addBatch({
   'once an http server is listening with a callback': {
     topic: function () {
       console.log('once an http server is listening with a callback');
-      server = require('http').createServer(function (request, response) {
+      server = http.createServer(function (request, response) {
         fileServer.serve(request, response, function(err, result) {
           if (callback)
             callback(request, response, err, result);
@@ -78,7 +80,7 @@ suite.addBatch({
     topic: function () {
       console.log('once an http server is listening without a callback');
       server.close();
-      server = require('http').createServer(function (request, response) {
+      server = http.createServer(function (request, response) {
         fileServer.serve(request, response);
       }).listen(TEST_PORT, this.callback)
     },
@@ -242,12 +244,12 @@ suite.addBatch({
   'addings custom mime types': {
     topic : function(){
       console.log('addings custom mime types');
-      static.mime.define({'application/font-woff': ['woff']});
+      _static.mime.define({'application/font-woff': ['woff']});
       this.callback();
     },
     'should add woff' : function(error, response, body){
       console.log('should add woff' );
-      assert.equal(static.mime.lookup('woff'), 'application/font-woff');
+      assert.equal(_static.mime.lookup('woff'), 'application/font-woff');
     }
   }
 })
@@ -310,5 +312,64 @@ suite.addBatch({
       assert.equal(response.statusCode, 404);
     }
   }
-}).export(module);
+})
+.addBatch({
+  'verify cache control header by default': {
+      topic: function() {
+        console.log('verify cache control header by default');
+        request.get({
+          url: TEST_SERVER + '/index.html'
+        }, this.callback);
+      },
+      'the value of max-age component from cache-control header must be 3600s = 1hour' : function(error, response, body) {
+        var cacheControl = response.headers['cache-control'],
+            components = {},
+            splitComponent;
 
+            _.each(cacheControl.split(";"), function(component){
+                splitComponent = component.split("=");                
+                components[splitComponent[0].trim()] = splitComponent[1];
+            });
+            console.log('components: ', components);
+
+        assert.equal(components['max-age'], '3600');
+      },
+  }
+})
+.addBatch({
+  'verify cache control header with max-age param setted': {
+      topic: function() {
+        console.log('verify cache control header with max-age param setted');
+        server.close();
+        server = new http.Server; 
+        //create new file server with cache = 7200, for 2 hours of freshness
+        fileServer = new _static.Server(__dirname + '/../fixtures', {cache: 7200});
+
+        server.on('request', function(req, res) {
+          fileServer.serve(req, res);
+        });
+
+        var that = this;
+        server.on('listening', function() {
+          request.get({
+            url: TEST_SERVER + '/index.html'
+          }, that.callback);
+        });
+
+        server.listen(TEST_PORT);
+      },
+      'the value of max-age component from cache-control header must be 7200s = 2hours' : function(error, response, body) {
+        var cacheControl = response.headers['cache-control'],
+            components = {},
+            splitComponent;
+
+            _.each(cacheControl.split(";"), function(component){
+                splitComponent = component.split("=");                
+                components[splitComponent[0].trim()] = splitComponent[1];
+            });
+
+        assert.equal(components['max-age'], '7200');
+      },
+  }
+})
+.export(module);
