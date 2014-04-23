@@ -387,4 +387,39 @@ suite.addBatch({
      },
   }
 })
+.addBatch({
+  'verify server gzip option, only true case, without regexp': {
+      topic: function() {
+        console.log('verify server gzip option, only true case, without regexp');
+        server.close();
+        server = new http.Server; 
+        //create new file server with cache = 7200, for 2 hours of freshness
+        fileServer = new _static.Server(__dirname + '/../fixtures', {
+                                                                        'gzip': true,
+                                                                    }
+                                      );
+
+        server.on('request', function(req, res) {
+          fileServer.serve(req, res);
+        });
+
+        var that = this;
+        server.on('listening', function() {
+          request.get({
+            url: TEST_SERVER + '/index.html',
+            headers: {
+              'accept-encoding': 'gzip',
+            },
+          }, that.callback);
+        });
+
+        server.listen(TEST_PORT);
+      },
+      'content-encoding header must be gzip' : function(error, response, body) {
+        console.log(response.headers);
+
+        assert.equal(true, /\bgzip\b/i.test(response.headers['content-encoding']));
+      },
+  }
+})
 .export(module);
