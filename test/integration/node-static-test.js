@@ -3,7 +3,9 @@ var vows    = require('vows'),
   request = require('request')
   , assert  = require('assert')
   , _static  = require('../../lib/node-static'),
-  http = require('http');
+  http = require('http'),
+  zlib = require('zlib'),
+  streamBuffers = require('stream-buffers');
 
 var fileServer  = new _static.Server(__dirname + '/../fixtures');
 var suite       = vows.describe('node-static');
@@ -419,6 +421,86 @@ suite.addBatch({
         console.log(response.headers);
 
         assert.equal(true, /\bgzip\b/i.test(response.headers['content-encoding']));
+      },
+      /*'verify that body is realy gzip': function(error, response, body) {
+        zlib.gunzip(body, function(err, bb) {
+          if(err) {
+            console.log('ERROR: ', err);
+            return;
+          }
+        
+          console.log('BODY: ', bb);
+        });
+      }
+      */
+  }
+})
+.addBatch({
+  'verify server gzip option, regexp case': {
+      topic: function() {
+        console.log('verify server gzip option, regexp case');
+        server.close();
+        server = new http.Server; 
+        //create new file server with cache = 7200, for 2 hours of freshness
+        fileServer = new _static.Server(__dirname + '/../fixtures', {
+                                                                        'gzip': /html/,
+                                                                    }
+                                      );
+
+        server.on('request', function(req, res) {
+          fileServer.serve(req, res);
+        });
+
+        var that = this;
+        server.on('listening', function() {
+          request.get({
+            url: TEST_SERVER + '/index.html',
+            headers: {
+              'accept-encoding': 'gzip',
+            },
+          }, that.callback);
+        });
+
+        server.listen(TEST_PORT);
+      },
+      'content-encoding header must be gzip' : function(error, response, body) {
+        console.log(response.headers);
+
+        assert.equal(true, /\bgzip\b/i.test(response.headers['content-encoding']));
+      },
+  }
+})
+.addBatch({
+  'verify server gzip option, regexp case': {
+      topic: function() {
+        console.log('verify server gzip option, regexp case');
+        server.close();
+        server = new http.Server; 
+        //create new file server with cache = 7200, for 2 hours of freshness
+        fileServer = new _static.Server(__dirname + '/../fixtures', {
+                                                                        'gzip': /___/,
+                                                                    }
+                                      );
+
+        server.on('request', function(req, res) {
+          fileServer.serve(req, res);
+        });
+
+        var that = this;
+        server.on('listening', function() {
+          request.get({
+            url: TEST_SERVER + '/index.html',
+            headers: {
+              'accept-encoding': 'gzip',
+            },
+          }, that.callback);
+        });
+
+        server.listen(TEST_PORT);
+      },
+      'content-encoding header must be absent' : function(error, response, body) {
+
+        assert.equal(false, 'content-encoding' in response.headers);
       },
   }
 })
