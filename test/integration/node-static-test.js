@@ -4,7 +4,6 @@ var vows    = require('vows'),
   , assert  = require('assert')
   , _static  = require('../../lib/node-static'),
   http = require('http'),
-  zlib = require('zlib'),
   streamBuffers = require('stream-buffers');
 
 var fileServer  = new _static.Server(__dirname + '/../fixtures');
@@ -422,17 +421,49 @@ suite.addBatch({
 
         assert.equal(true, /\bgzip\b/i.test(response.headers['content-encoding']));
       },
-      /*'verify that body is realy gzip': function(error, response, body) {
-        zlib.gunzip(body, function(err, bb) {
-          if(err) {
-            console.log('ERROR: ', err);
-            return;
-          }
-        
-          console.log('BODY: ', bb);
+  }
+})
+.addBatch({
+  'verify server gzip option, only true case, without regexp': {
+      topic: function() {
+        console.log('verify server gzip option, only true case, without regexp');
+        server.close();
+        server = new http.Server; 
+        //create new file server with cache = 7200, for 2 hours of freshness
+        fileServer = new _static.Server(__dirname + '/../fixtures', {
+                                                                        'gzip': true,
+                                                                    }
+                                      );
+
+        server.on('request', function(req, res) {
+          fileServer.serve(req, res);
         });
-      }
-      */
+
+        var gunzip = require('zlib').createGunzip();
+        var that = this;
+        server.on('listening', function() {
+          request.get({
+            url: TEST_SERVER + '/index.html',
+            headers: {
+              'accept-encoding': 'gzip',
+            },
+          }).pipe(gunzip).pipe(process.stdout);//, that.callback);
+        });
+
+        gunzip.on('error', function(err) {
+          that.callback(err);
+        });
+
+        gunzip.on('end', function() {
+          that.callback();
+        });
+
+        server.listen(TEST_PORT);
+      },
+      'try to gunzip the content' : function(err) {
+        console.log('try to gunzip the content' );
+        assert.equal(undefined, err);
+      },
   }
 })
 .addBatch({
@@ -499,8 +530,7 @@ suite.addBatch({
         server.listen(TEST_PORT);
       },
       'content-encoding header must be absent' : function(error, response, body) {
-
-        assert.equal(false, 'content-encoding' in response.headers);
+          assert.equal(false, 'content-encoding' in response.headers);
       },
   }
 })
